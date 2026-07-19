@@ -1,3 +1,9 @@
+<div align="center">
+  <img src="assets/thumbnail.png" alt="JigglyPuff Banner" width="100%"/>
+</div>
+
+---
+
 # JigglyPuff
 
 A **monitoring dashboard** for your self-hosted home media server, built with
