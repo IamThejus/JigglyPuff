@@ -1,13 +1,14 @@
 # JigglyPuff
 
-A **monitoring dashboard** for a self-hosted Dell home media server, built with
+A **monitoring dashboard** for your self-hosted home media server, built with
 **Flutter** for Android. It consumes the `media-server-api` FastAPI backend
 (everything under `/api/v1`) and renders system health, storage, torrent
 activity, library contents, and service status — with live auto-refresh, a
 **real-time torrent WebSocket**, pull-to-refresh, and pink-branded "Deep
-Obsidian" styling. The monitoring surface is read-only; a small set of
-**authenticated control actions** (add torrent, sync movies) is also
-supported.
+Obsidian" styling. It also has a **movie discovery search** (find a title →
+pick a torrent → add straight to qBittorrent). The monitoring surface is
+read-only; a small set of **authenticated control actions** (add torrent,
+pause/resume/delete, sync movies) rounds it out.
 
 > Looking for internal conventions, architecture rules, and what *not* to
 > change without asking? See **`CLAUDE.md`** — this file is the product/API
@@ -17,6 +18,7 @@ supported.
 
 ## Contents
 
+- [Screenshots](#screenshots)
 - [Run it](#run-it)
 - [System architecture](#system-architecture)
 - [How data flows: the polling engine](#how-data-flows-the-polling-engine)
@@ -26,6 +28,23 @@ supported.
 - [Design system](#design-system)
 - [Extending toward v2 (control actions)](#extending-toward-v2-control-actions)
 - [Tests](#tests)
+
+---
+
+## Screenshots
+
+<p align="center">
+  <img src="assets/jigglypuff.jpg" width="120" alt="JigglyPuff app icon"><br/>
+  <em>Pink-branded, dark-first — a monitor for any self-hosted media server.</em>
+</p>
+
+| Dashboard | Search | Torrents |
+|:---:|:---:|:---:|
+| <img src="screenshots/dashboard.png" width="240" alt="Dashboard"> | <img src="screenshots/search.png" width="240" alt="Movie search"> | <img src="screenshots/torrents.png" width="240" alt="Torrents (live)"> |
+| **Storage** | **System** | **Library** |
+| <img src="screenshots/storage.png" width="240" alt="Storage"> | <img src="screenshots/system.png" width="240" alt="System overview"> | <img src="screenshots/library.png" width="240" alt="Library"> |
+| **Settings** | **Splash** | |
+| <img src="screenshots/settings.png" width="240" alt="Settings"> | <img src="screenshots/splash.png" width="240" alt="Splash"> | |
 
 ---
 
@@ -243,7 +262,7 @@ in one round trip.
 ```jsonc
 {
   "hostname": "dell-server",
-  "server_name": "Dell Media Server",
+  "server_name": "Home Media Server",
   "uptime_seconds": 3589,
   "uptime_human": "59m",
   "cpu_percent": 4.2,
@@ -557,10 +576,9 @@ poster strip using `PosterImage` for each recently-added item.
 
 **Purpose:** the full listing for each category.
 
-**Query params:** `sizes` (bool, default `false` in the app) — when `false`,
-every item's `size_bytes` is `0`/`size_human` is `"0 B"` (fast path, no
-per-file stat calls); toggle **Load Sizes** in the Library screen to re-fetch
-with `sizes=true`.
+**Query params:** `sizes` (bool) — when `false`, every item's `size_bytes` is
+`0`/`size_human` is `"0 B"` (fast path, no per-file stat calls). The Library
+screen always requests `sizes=true` so per-title sizes are shown.
 
 **Response**
 ```jsonc
@@ -682,7 +700,7 @@ when art is missing.
 | **Torrents** | `GET /torrents/ws` (list, live) + REST fallback; `GET /torrents/summary` (header); `POST /actions/*` (buttons + row ⋮ menu) | real-time (~2s) for the list; global interval for the header | Segmented filter; per-torrent progress + speed; **LIVE** badge; Add Torrent (paste link / pick file), Sync Movies, and per-row Pause/Resume/Delete. |
 | **Storage** | `GET /storage/summary?folder_sizes=` | global interval | Per-disk usage cards (health-colored), folder-size list, SMART card; folder-sizes toggle. |
 | **System** | `GET /system/overview` | global interval | Overview, CPU + load-average sparkline, memory/swap bars, thermals/battery/network (only rendered when present). |
-| **Library** | `GET /library/summary`, `GET /library/movies\|shows?sizes=` | once per load (`Duration.zero` — no continuous polling; pull-to-refresh still works) | Counts + recently-added poster strip, movies/shows toggle, sizes toggle, client-side search, real poster art via `PosterImage`. |
+| **Library** | `GET /library/summary`, `GET /library/movies\|shows?sizes=true` | once per load (`Duration.zero` — no continuous polling; pull-to-refresh still works) | Counts + recently-added poster strip, movies/shows toggle, client-side search, per-title sizes, real poster art via `PosterImage`. |
 | **Search** | `GET /movies/search?q=`, `GET /movies/torrents?title=`, `POST /actions/torrents` (download) | on-demand (debounced) | Debounced (350ms, min 2 chars, cancels stale) movie search with skeleton loaders; tap a result → torrent bottom sheet (sorted by seeds, quality chips) → Add to qBittorrent. |
 | **Settings** | `GET /health` (on demand) | — | Base URL, auth token, **actions API key**, refresh interval, Test Connection. Reached from the app-bar gear, not a tab. |
 | **Splash** | none | — | Branded launch screen (mascot + wordmark), auto-advances to the tab shell after ~1.9s. |
@@ -707,8 +725,13 @@ when art is missing.
   linear bar), `StatusChip`/`StatusDot` (pill + pulsing dot), `GlassCard`/
   `StatCard`/`Section` (tonal-elevation surfaces, no drop shadows), the four
   state widgets (`LoadingState`/`ErrorState`/`DegradedState`/`EmptyState`),
-  and `JigglyLogo` — a hand-painted `CustomPainter` mascot (not an image
-  asset).
+  `Shimmer`/`SkeletonBox` (search loaders), `AnimatedSegmented` (sliding-pill
+  filters), and `JigglyLogo` — a hand-painted `CustomPainter` mascot used
+  in-app.
+- **Launcher icon:** generated from `assets/jigglypuff.jpg` via
+  `flutter_launcher_icons` (config in `pubspec.yaml`; adaptive icon uses a
+  mascot-cropped foreground over black). Regenerate with
+  `dart run flutter_launcher_icons`.
 
 ---
 

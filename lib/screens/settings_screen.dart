@@ -167,7 +167,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const JigglyLogo(size: 40, sparkle: true),
                 const SizedBox(height: 8),
                 Text('Jigglypuff v1.0.0', style: AppText.labelTechnical(color: AppColors.onSurface)),
-                Text('Dell Media Server Monitor · read-only', style: AppText.labelTechnical()),
+                Text('Self-hosted Server Monitor · read-only', style: AppText.labelTechnical()),
               ],
             ),
           ),

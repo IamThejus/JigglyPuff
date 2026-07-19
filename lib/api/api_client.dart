@@ -22,7 +22,7 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
-/// Tiny fetch wrapper around the read-only Dell Media Server API.
+/// Tiny fetch wrapper around the read-only media server API.
 ///
 /// Everything is `GET` under `/api/v1` with no auth in v1. The `Authorization`
 /// header is attached whenever an auth token is configured, so v2 control

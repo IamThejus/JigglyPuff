@@ -6,7 +6,7 @@ repository. Read this before making changes.
 ## What this project is
 
 **JigglyPuff** is a read-only Flutter (Android) monitoring dashboard for a
-self-hosted Dell home media server. It talks to the `media-server-api` FastAPI
+self-hosted home media server. It talks to the `media-server-api` FastAPI
 backend (a sibling project — see `../../media-server-api` if present) over
 plain HTTP on the LAN, and renders system health, storage, torrent activity,
 library contents, and service status, with live auto-refresh.

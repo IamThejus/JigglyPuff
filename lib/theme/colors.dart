@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// "Deep Obsidian" palette from the Dell Server Sentinel design system.
+/// "Deep Obsidian" palette from the Server Sentinel design system.
 ///
 /// The interface is deliberately monochrome — color is reserved for *status*
 /// and data visualisation only (see [statusColor]).
